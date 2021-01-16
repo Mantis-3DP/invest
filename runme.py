@@ -6,8 +6,15 @@
 #
 # print(data)
 
+import csv
+import numpy as np
 
 
+import pandas as pd
+import pathlib
+
+datapath = pathlib.Path(__file__).parent
+df = pd.read_csv(str(datapath)+"/data/roomPrices.csv", index_col=0)
 
 class investment:
 
@@ -23,6 +30,8 @@ class investment:
 
     def calcNetRent(self, N_aprt, Qm_aprt, count_room):
         #dictionarys for the different amount of rooms
+
+
 
         one_room_prices = dict([
                 (15 , 19.02),
