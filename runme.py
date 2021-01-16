@@ -139,16 +139,17 @@ class investment:
                             (4, four_room_prices),
                             (5, five_room_prices)])
 
-        # fail safe if apartment has more that 5 rooms 
+        # fail safe if apartment has more than 5 rooms 
         if count_room > 5:
             count_room = 5
 
 
-        #calculation of the qm price with linear interpolation
+        #calculation of the qm price
         if Qm_aprt%5 == 0:
             return round((qm_prices[count_room][Qm_aprt] * Qm_aprt) * N_aprt, 2)
 
         else:
+        	# with linear interpolation
             Qm_aprt_lower = Qm_aprt - Qm_aprt%5
             Qm_aprt_upper = Qm_aprt_lower + 5
             interpolation = ((qm_prices[count_room][Qm_aprt_upper] - qm_prices[count_room][Qm_aprt_lower]) / 5) * (Qm_aprt%5)
@@ -157,22 +158,13 @@ class investment:
 
     def aWohn(self):
         maxA = self.aGrund * self.GFZ
-
-
         return maxA
 
-
-
     def ruecklagen(self):
-
         rueckpa = self.wertHaus * 0.02
         rueckpm = rueckpa/12
 
         return rueckpa, rueckpm
-
-
-
-
 
 if __name__ == "__main__":
 
