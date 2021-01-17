@@ -19,6 +19,8 @@ class rent:
 
     def __init__(self, wohnlagenklasse, Baujahr):
 
+        # Characteristics of the building
+
         self.wohnlagenklasse = wohnlagenklasse
         self.Baujahr = Baujahr
 
