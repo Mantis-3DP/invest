@@ -15,7 +15,7 @@ datapath = pathlib.Path(__file__).parent
 roomPrices = pd.read_csv(str(datapath) + "/data/qmPrices.csv", index_col=0)
 
 
-class rent:
+class building:
 
     def __init__(self, wohnlagenklasse, Baujahr):
 
@@ -102,7 +102,7 @@ class rent:
 
 
 if __name__ == "__main__":
-    test = rent(wohnlagenklasse= 4, Baujahr= 2000)
+    test = building(wohnlagenklasse= 4, Baujahr= 2000)
     print("Monatliche Nettomieteinnahmen dieser Wohnung sind:   {}€"
         .format(test.calcNetRent(Qm_aprt=75.62, count_room=3)))
     print("Monatliche Mieteinnahmen dieser Wohnung sind:        {}€"
