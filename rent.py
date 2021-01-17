@@ -15,20 +15,15 @@ datapath = pathlib.Path(__file__).parent
 roomPrices = pd.read_csv(str(datapath) + "/data/qmPrices.csv", index_col=0)
 
 
-class investment:
+class rent:
 
-    def __init__(self, maxGeschoss, aGrund, GFZ, wertHaus, wohnlagenklasse, Baujahr, N_aprt, count_room):
+    def __init__(self, wohnlagenklasse, Baujahr):
 
-        self.maxGeschoss = maxGeschoss
-        self.aGrund = aGrund
-        self.GFZ = GFZ
-        self.wertHaus = wertHaus
         self.wohnlagenklasse = wohnlagenklasse
         self.Baujahr = Baujahr
-        self.N_aprt = N_aprt
-        self.count_room = count_room
 
-    def calcNetRent(self):
+
+    def calcNetRent(self, Qm_aprt, count_room):
 
         # N_aprt: total number of apartments in the building
         # Qm_aprt: Size of a single of the apartments
@@ -37,28 +32,27 @@ class investment:
 
         # dictionaries for the different amount of rooms
 
-        datapath = pathlib.Path(__file__).parent
-        qmPrices = pd.read_csv(str(datapath) + "/data/qmPrices.csv", index_col=0)
+        qmPrices = pd.read_csv(str(pathlib.Path(__file__).parent) + "/data/qmPrices.csv", index_col=0)
         qmPrices.columns = qmPrices.columns.astype(int)
 
         # fail safe if apartment has more than 5 rooms 
-        if self.count_room > 5:
-            self.count_room = 5
+        if count_room > 5:
+            count_room = 5
 
         # calculation of the qm price
-        Qm_aprt = self.aWohn() / self.N_aprt
+
 
         if Qm_aprt % 5 == 0:
-            return round((qmPrices[self.count_room][Qm_aprt] * Qm_aprt) * self.N_aprt, 2)
+            return round((qmPrices[count_room][Qm_aprt] * Qm_aprt), 2)
 
         else:
             # with linear interpolation
             Qm_aprt_lower = Qm_aprt - Qm_aprt % 5
             Qm_aprt_upper = Qm_aprt_lower + 5
-            interpolation = ((qmPrices[self.count_room][Qm_aprt_upper] - qmPrices[self.count_room][Qm_aprt_lower]) / 5) * (
+            interpolation = ((qmPrices[count_room][Qm_aprt_upper] - qmPrices[count_room][Qm_aprt_lower]) / 5) * (
                         Qm_aprt % 5)
 
-            return round(((qmPrices[self.count_room][Qm_aprt_lower] + interpolation) * Qm_aprt) * self.N_aprt, 2)
+            return round(((qmPrices[count_room][Qm_aprt_lower] + interpolation) * Qm_aprt), 2)
 
     def calcSurchargeRent(self):
         surcharge = 0
@@ -87,28 +81,36 @@ class investment:
 
         return surcharge
 
-    def calcRent(self):
+    def calcRent(self, Qm_aprt, count_room):
 
-        netRent = self.calcNetRent()
+        netRent = self.calcNetRent(Qm_aprt, count_room)
         rent = round(netRent + netRent * self.calcSurchargeRent(), 2)
 
         return rent
 
+    def calcRentBuilding(self):
+        aprts = pd.read_csv(str(pathlib.Path(__file__).parent) + "/data/aprts.csv")
+        rentBuilding: int = 0
+        netRentBuilding: int = 0
+        for i in range(aprts.shape[0]):
+            rentBuilding += self.calcRent(Qm_aprt=aprts["Qm_aprt"][i], count_room=aprts["count_room"][i])
+            netRentBuilding += self.calcNetRent(Qm_aprt=aprts["Qm_aprt"][i], count_room=aprts["count_room"][i])
+        return rentBuilding, netRentBuilding
 
-    def aWohn(self):
-        maxA = self.aGrund * self.GFZ
-        return round(maxA, 2)
-
-    def ruecklagen(self):
-        rueckpa = self.wertHaus * 0.02
-        rueckpm = rueckpa / 12
-
-        return rueckpa, rueckpm
 
 
 if __name__ == "__main__":
-    test = investment(maxGeschoss = 4, aGrund = 564, GFZ = 0.8, wertHaus = 700000, wohnlagenklasse= 4, Baujahr= 2000, N_aprt= 6, count_room= 3)
-    print("Monatliche Nettomieteinnahmen sind:  {}€"
-        .format(test.calcNetRent()))
-    print("Monatliche Mieteinnahmen sind:       {}€"
-        .format(test.calcRent()))
+    test = rent(wohnlagenklasse= 4, Baujahr= 2000)
+    print("Monatliche Nettomieteinnahmen dieser Wohnung sind:   {}€"
+        .format(test.calcNetRent(Qm_aprt=75.62, count_room=3)))
+    print("Monatliche Mieteinnahmen dieser Wohnung sind:        {}€"
+        .format(test.calcRent(Qm_aprt=75.62, count_room=3)))
+
+    rentBuilding, netRentBuilding = test.calcRentBuilding()
+    print("Monatliche Nettomieteinnahmen des Gebäudes sind:     {}€"
+        .format(netRentBuilding))
+    print("Monatliche Mieteinnahmen des Gebäudes sind:          {}€"
+        .format(rentBuilding))
+
+
+
