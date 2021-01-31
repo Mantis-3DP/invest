@@ -12,3 +12,5 @@
 ## should be able to shift an investment into the future to reach the min. investment per buy
 
 ## equity vs debt calculations
+
+## Scenario analyses
